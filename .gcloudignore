@@ -1,0 +1,8 @@
+# What gcloud leaves out when it uploads this folder to Cloud Build.
+.git
+.gitignore
+.forma
+node_modules
+*.db
+*.db-*
+.env*

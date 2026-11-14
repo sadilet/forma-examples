@@ -1,0 +1,255 @@
+{
+  "blocks": [
+    {
+      "id": "shape:sg-store",
+      "kind": "database",
+      "title": "SlotGuard store",
+      "description": "Persists owners, services, slots, appointments, payment references, and an audit of deposit state changes."
+    },
+    {
+      "id": "shape:sg-engine",
+      "kind": "service",
+      "title": "Booking engine",
+      "description": "Creates appointments against availability and prevents double-booking. Concurrency rules are open."
+    },
+    {
+      "id": "shape:sg-booking-page",
+      "kind": "screen",
+      "title": "Public booking page",
+      "description": "Client picks a service and a time, enters contact details, and sees the deposit amount and cancel policy before paying."
+    },
+    {
+      "id": "shape:sg-checkout",
+      "kind": "screen",
+      "title": "Deposit checkout",
+      "description": "Collects the deposit and shows success and an appointment summary. In this demo build checkout is a mock: every deposit is confirmed and no money is charged. Failure and retry behavior are not specified."
+    },
+    {
+      "id": "shape:sg-pricing",
+      "kind": "decision",
+      "title": "Pricing model",
+      "description": "Undecided: flat SaaS per location, a percentage of deposits, or a hybrid. Must be settled with market research before the strategy is locked."
+    },
+    {
+      "id": "shape:sg-deposit-rules",
+      "kind": "decision",
+      "title": "Deposit rules",
+      "description": "Undecided: deposit amount (percent of the service or a fixed amount), cancel cutoff (for example 24 hours), keep 100% or part on a late cancel, and how no-shows are handled."
+    },
+    {
+      "id": "shape:sg-notifications",
+      "kind": "service",
+      "title": "Notifications",
+      "description": "Sends booking confirmed, reminder, and cancel outcomes. Email first. SMS is undecided."
+    },
+    {
+      "id": "shape:sg-client",
+      "kind": "entity",
+      "title": "Client",
+      "description": "Booker. May be a guest (email or phone only) in v1."
+    },
+    {
+      "id": "shape:sg-provider",
+      "kind": "decision",
+      "title": "Payments provider",
+      "description": "Undecided: Stripe (cards, payment intents) or another provider. Affects webhooks, refunds, and the docs pack. The demo build uses a mock."
+    },
+    {
+      "id": "shape:sg-owner",
+      "kind": "entity",
+      "title": "Owner",
+      "description": "The paying customer. Login and business profile now, payout settings later."
+    },
+    {
+      "id": "shape:sg-dashboard",
+      "kind": "screen",
+      "title": "Owner dashboard",
+      "description": "Lists today's and upcoming appointments with the deposit status: authorized, captured, refunded, or forfeited."
+    },
+    {
+      "id": "shape:sg-deposits",
+      "kind": "service",
+      "title": "Deposit & refunds",
+      "description": "Creates the deposit, then handles capture, refund, and forfeit per the deposit rules. The demo build uses a mock provider that always confirms. A real provider needs webhook verification."
+    },
+    {
+      "id": "shape:sg-cancel",
+      "kind": "screen",
+      "title": "Cancel / reschedule",
+      "description": "Client cancels or reschedules. The system applies the refund or keep rules based on the cutoff."
+    },
+    {
+      "id": "shape:sg-intent",
+      "kind": "note",
+      "title": "Product intent",
+      "description": "Independent salons, clinics, tutors, and studios (1–5 chairs or rooms) lose money on no-shows. SlotGuard sells to the owner: booking link, deposit rules, and a dashboard. Not a full salon OS."
+    },
+    {
+      "id": "shape:sg-services",
+      "kind": "screen",
+      "title": "Services & availability",
+      "description": "Owner defines services, prices, durations, and open hours. v1 can be minimal."
+    },
+    {
+      "id": "shape:sg-appointment",
+      "kind": "entity",
+      "title": "Appointment",
+      "description": "Service, time, client, and the deposit state machine."
+    }
+  ],
+  "connections": [
+    {
+      "id": "shape:ZC6tcggf1FJByI_WwvUpU",
+      "fromId": "shape:sg-engine",
+      "toId": "shape:sg-store",
+      "fromTitle": "Booking engine",
+      "toTitle": "SlotGuard store",
+      "label": "writes"
+    },
+    {
+      "id": "shape:Q8d-VXaJsJ_KyZJFQb2lC",
+      "fromId": "shape:sg-checkout",
+      "toId": "shape:sg-deposits",
+      "fromTitle": "Deposit checkout",
+      "toTitle": "Deposit & refunds",
+      "label": "pays"
+    },
+    {
+      "id": "shape:IBv8u6SvRNLuhirEp4WGi",
+      "fromId": "shape:sg-cancel",
+      "toId": "shape:sg-deposits",
+      "fromTitle": "Cancel / reschedule",
+      "toTitle": "Deposit & refunds",
+      "label": "refunds"
+    },
+    {
+      "id": "shape:nTpt0908ygE2NUl5d1Ijr",
+      "fromId": "shape:sg-checkout",
+      "toId": "shape:sg-engine",
+      "fromTitle": "Deposit checkout",
+      "toTitle": "Booking engine",
+      "label": "reserves"
+    },
+    {
+      "id": "shape:2VYigtdCNqyEtJDJuIMC3",
+      "fromId": "shape:sg-intent",
+      "toId": "shape:sg-pricing",
+      "fromTitle": "Product intent",
+      "toTitle": "Pricing model",
+      "label": "frames"
+    },
+    {
+      "id": "shape:M7OE2bkr7EJCk4crUBCfG",
+      "fromId": "shape:sg-pricing",
+      "toId": "shape:sg-dashboard",
+      "fromTitle": "Pricing model",
+      "toTitle": "Owner dashboard",
+      "label": "shapes plan"
+    },
+    {
+      "id": "shape:5TmES1f4rbe3L2Vtk5QzZ",
+      "fromId": "shape:sg-deposit-rules",
+      "toId": "shape:sg-checkout",
+      "fromTitle": "Deposit rules",
+      "toTitle": "Deposit checkout",
+      "label": "shown in"
+    },
+    {
+      "id": "shape:OTRdBn5WjJxScu5Hk1bK9",
+      "fromId": "shape:sg-engine",
+      "toId": "shape:sg-notifications",
+      "fromTitle": "Booking engine",
+      "toTitle": "Notifications",
+      "label": "events"
+    },
+    {
+      "id": "shape:ebqfqFp-EQRbDuzwvV0wZ",
+      "fromId": "shape:sg-services",
+      "toId": "shape:sg-engine",
+      "fromTitle": "Services & availability",
+      "toTitle": "Booking engine",
+      "label": "offers"
+    },
+    {
+      "id": "shape:VOKt5NMvMZ8q9ssAcaBz0",
+      "fromId": "shape:sg-deposit-rules",
+      "toId": "shape:sg-deposits",
+      "fromTitle": "Deposit rules",
+      "toTitle": "Deposit & refunds",
+      "label": "governs"
+    },
+    {
+      "id": "shape:usQU1nhjZQgUOf_ktH61B",
+      "fromId": "shape:sg-owner",
+      "toId": "shape:sg-dashboard",
+      "fromTitle": "Owner",
+      "toTitle": "Owner dashboard",
+      "label": "uses"
+    },
+    {
+      "id": "shape:kOar5oSWS2QwbmQH3vrA7",
+      "fromId": "shape:sg-client",
+      "toId": "shape:sg-booking-page",
+      "fromTitle": "Client",
+      "toTitle": "Public booking page",
+      "label": "books"
+    },
+    {
+      "id": "shape:gtCN9yARPEQ4QsAGIpx38",
+      "fromId": "shape:sg-deposit-rules",
+      "toId": "shape:sg-cancel",
+      "fromTitle": "Deposit rules",
+      "toTitle": "Cancel / reschedule",
+      "label": "applied in"
+    },
+    {
+      "id": "shape:IWKbqQNdT4y7g5yFQWnhf",
+      "fromId": "shape:sg-appointment",
+      "toId": "shape:sg-store",
+      "fromTitle": "Appointment",
+      "toTitle": "SlotGuard store",
+      "label": "stored in"
+    },
+    {
+      "id": "shape:PBqep1-tb_95DOlR8f6wZ",
+      "fromId": "shape:sg-intent",
+      "toId": "shape:sg-deposit-rules",
+      "fromTitle": "Product intent",
+      "toTitle": "Deposit rules",
+      "label": "frames"
+    },
+    {
+      "id": "shape:MzkUSUidAwjwSUdLGbHSZ",
+      "fromId": "shape:sg-deposits",
+      "toId": "shape:sg-store",
+      "fromTitle": "Deposit & refunds",
+      "toTitle": "SlotGuard store",
+      "label": "audits"
+    },
+    {
+      "id": "shape:EIEw77qeAzoHfqO8HTzTI",
+      "fromId": "shape:sg-booking-page",
+      "toId": "shape:sg-checkout",
+      "fromTitle": "Public booking page",
+      "toTitle": "Deposit checkout",
+      "label": "continues"
+    },
+    {
+      "id": "shape:2TJh_dyXuaBEJOwqbYoxf",
+      "fromId": "shape:sg-dashboard",
+      "toId": "shape:sg-store",
+      "fromTitle": "Owner dashboard",
+      "toTitle": "SlotGuard store",
+      "label": "reads"
+    },
+    {
+      "id": "shape:QCIe5JCqxJ2eu4JQ1bQ5e",
+      "fromId": "shape:sg-provider",
+      "toId": "shape:sg-deposits",
+      "fromTitle": "Payments provider",
+      "toTitle": "Deposit & refunds",
+      "label": "powers"
+    }
+  ],
+  "sketches": []
+}

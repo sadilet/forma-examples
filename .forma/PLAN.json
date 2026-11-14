@@ -1,0 +1,239 @@
+{
+  "version": 1,
+  "summary": "SlotGuard helps local service businesses cut no-show losses by collecting a small refundable deposit at booking time. Owners get a booking link and a simple dashboard; clients see clear cancel rules. This canvas is the first pass: booking, deposits, refunds, and owner visibility. Pricing, payment provider, and deposit rules are still open.\nProduct intent: Independent salons, clinics, tutors, and studios (1–5 chairs or rooms) lose money on no-shows. SlotGuard sells to the owner: booking link, deposit rules, and a dashboard. Not a full salon OS.",
+  "tasks": [
+    {
+      "id": "scaffold",
+      "kind": "scaffold",
+      "title": "App skeleton",
+      "blockIds": [],
+      "dependsOn": [],
+      "goal": "Create the app skeleton: server, routes, database setup that migrates and seeds demo data on start, and a /api/health route.",
+      "constraints": [],
+      "acceptance": [
+        "The app starts with one command.",
+        "GET /api/health returns 200.",
+        "A first start creates demo data."
+      ]
+    },
+    {
+      "id": "data",
+      "kind": "data",
+      "title": "Data model",
+      "blockIds": [
+        "shape:sg-store",
+        "shape:sg-client",
+        "shape:sg-owner",
+        "shape:sg-appointment"
+      ],
+      "dependsOn": [
+        "scaffold"
+      ],
+      "goal": "Create the data model for: SlotGuard store, Client, Owner, Appointment.",
+      "constraints": [],
+      "acceptance": [
+        "SlotGuard store: Persists owners, services, slots, appointments, payment references, and an audit of deposit state changes.",
+        "Client: Booker. May be a guest (email or phone only) in v1.",
+        "Owner: The paying customer. Login and business profile now, payout settings later.",
+        "Appointment: Service, time, client, and the deposit state machine."
+      ]
+    },
+    {
+      "id": "service:shape:sg-notifications",
+      "kind": "service",
+      "title": "Notifications",
+      "blockIds": [
+        "shape:sg-notifications"
+      ],
+      "dependsOn": [
+        "data"
+      ],
+      "goal": "Build the service \"Notifications\".",
+      "constraints": [],
+      "acceptance": [
+        "Sends booking confirmed, reminder, and cancel outcomes. Email first. SMS is undecided.",
+        "Is used by Booking engine (events)."
+      ]
+    },
+    {
+      "id": "service:shape:sg-engine",
+      "kind": "service",
+      "title": "Booking engine",
+      "blockIds": [
+        "shape:sg-engine"
+      ],
+      "dependsOn": [
+        "data",
+        "service:shape:sg-notifications"
+      ],
+      "goal": "Build the service \"Booking engine\".",
+      "constraints": [],
+      "acceptance": [
+        "Creates appointments against availability and prevents double-booking. Concurrency rules are open.",
+        "Uses SlotGuard store (writes).",
+        "Uses Notifications (events).",
+        "Is used by Deposit checkout (reserves).",
+        "Is used by Services & availability (offers)."
+      ]
+    },
+    {
+      "id": "service:shape:sg-deposits",
+      "kind": "service",
+      "title": "Deposit & refunds",
+      "blockIds": [
+        "shape:sg-deposits"
+      ],
+      "dependsOn": [
+        "data"
+      ],
+      "goal": "Build the service \"Deposit & refunds\".",
+      "constraints": [
+        "Deposit rules: Undecided: deposit amount (percent of the service or a fixed amount), cancel cutoff (for example 24 hours), keep 100% or part on a late cancel, and how no-shows are handled.",
+        "Payments provider: Undecided: Stripe (cards, payment intents) or another provider. Affects webhooks, refunds, and the docs pack. The demo build uses a mock."
+      ],
+      "acceptance": [
+        "Creates the deposit, then handles capture, refund, and forfeit per the deposit rules. The demo build uses a mock provider that always confirms. A real provider needs webhook verification.",
+        "Uses SlotGuard store (audits).",
+        "Is used by Deposit checkout (pays).",
+        "Is used by Cancel / reschedule (refunds).",
+        "Is used by Deposit rules (governs).",
+        "Is used by Payments provider (powers)."
+      ]
+    },
+    {
+      "id": "screen:shape:sg-checkout",
+      "kind": "screen",
+      "title": "Deposit checkout",
+      "blockIds": [
+        "shape:sg-checkout"
+      ],
+      "dependsOn": [
+        "data",
+        "service:shape:sg-engine",
+        "service:shape:sg-deposits"
+      ],
+      "goal": "Build the screen \"Deposit checkout\".",
+      "constraints": [
+        "Deposit rules: Undecided: deposit amount (percent of the service or a fixed amount), cancel cutoff (for example 24 hours), keep 100% or part on a late cancel, and how no-shows are handled."
+      ],
+      "acceptance": [
+        "Collects the deposit and shows success and an appointment summary. In this demo build checkout is a mock: every deposit is confirmed and no money is charged. Failure and retry behavior are not specified.",
+        "Uses Deposit & refunds (pays).",
+        "Uses Booking engine (reserves).",
+        "Is used by Deposit rules (shown in).",
+        "Is used by Public booking page (continues)."
+      ]
+    },
+    {
+      "id": "screen:shape:sg-booking-page",
+      "kind": "screen",
+      "title": "Public booking page",
+      "blockIds": [
+        "shape:sg-booking-page"
+      ],
+      "dependsOn": [
+        "data",
+        "screen:shape:sg-checkout"
+      ],
+      "goal": "Build the screen \"Public booking page\".",
+      "constraints": [],
+      "acceptance": [
+        "Client picks a service and a time, enters contact details, and sees the deposit amount and cancel policy before paying.",
+        "Uses Deposit checkout (continues).",
+        "Is used by Client (books)."
+      ]
+    },
+    {
+      "id": "screen:shape:sg-dashboard",
+      "kind": "screen",
+      "title": "Owner dashboard",
+      "blockIds": [
+        "shape:sg-dashboard"
+      ],
+      "dependsOn": [
+        "data"
+      ],
+      "goal": "Build the screen \"Owner dashboard\".",
+      "constraints": [
+        "Pricing model: Undecided: flat SaaS per location, a percentage of deposits, or a hybrid. Must be settled with market research before the strategy is locked."
+      ],
+      "acceptance": [
+        "Lists today's and upcoming appointments with the deposit status: authorized, captured, refunded, or forfeited.",
+        "Uses SlotGuard store (reads).",
+        "Is used by Pricing model (shapes plan).",
+        "Is used by Owner (uses)."
+      ]
+    },
+    {
+      "id": "screen:shape:sg-cancel",
+      "kind": "screen",
+      "title": "Cancel / reschedule",
+      "blockIds": [
+        "shape:sg-cancel"
+      ],
+      "dependsOn": [
+        "data",
+        "service:shape:sg-deposits"
+      ],
+      "goal": "Build the screen \"Cancel / reschedule\".",
+      "constraints": [
+        "Deposit rules: Undecided: deposit amount (percent of the service or a fixed amount), cancel cutoff (for example 24 hours), keep 100% or part on a late cancel, and how no-shows are handled."
+      ],
+      "acceptance": [
+        "Client cancels or reschedules. The system applies the refund or keep rules based on the cutoff.",
+        "Uses Deposit & refunds (refunds).",
+        "Is used by Deposit rules (applied in)."
+      ]
+    },
+    {
+      "id": "screen:shape:sg-services",
+      "kind": "screen",
+      "title": "Services & availability",
+      "blockIds": [
+        "shape:sg-services"
+      ],
+      "dependsOn": [
+        "data",
+        "service:shape:sg-engine"
+      ],
+      "goal": "Build the screen \"Services & availability\".",
+      "constraints": [],
+      "acceptance": [
+        "Owner defines services, prices, durations, and open hours. v1 can be minimal.",
+        "Uses Booking engine (offers)."
+      ]
+    },
+    {
+      "id": "integrate",
+      "kind": "integrate",
+      "title": "Integration and smoke test",
+      "blockIds": [],
+      "dependsOn": [
+        "scaffold",
+        "data",
+        "service:shape:sg-notifications",
+        "service:shape:sg-engine",
+        "service:shape:sg-deposits",
+        "screen:shape:sg-checkout",
+        "screen:shape:sg-booking-page",
+        "screen:shape:sg-dashboard",
+        "screen:shape:sg-cancel",
+        "screen:shape:sg-services"
+      ],
+      "goal": "Connect the pieces, run the main flow end to end, and make sure the container builds and starts.",
+      "constraints": [],
+      "acceptance": [
+        "The main flow works from the first screen to the stored result.",
+        "GET /api/health returns 200."
+      ]
+    }
+  ],
+  "warnings": [
+    "Decision \"Pricing model\" is still open. The builder must pick a default and record it.",
+    "Decision \"Deposit rules\" is still open. The builder must pick a default and record it.",
+    "Decision \"Payments provider\" is still open. The builder must pick a default and record it.",
+    "Block \"Booking engine\" has open questions. The builder must pick a default and record it.",
+    "Block \"Deposit checkout\" has open questions. The builder must pick a default and record it.",
+    "Block \"Notifications\" has open questions. The builder must pick a default and record it."
+  ]
+}
