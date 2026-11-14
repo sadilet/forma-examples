@@ -1,11 +1,11 @@
 {
-  "releaseId": "aba47635-e6f9-436d-a7a8-a0a1a331bfab",
+  "releaseId": "827fb3af-5fb8-412f-948e-822f2f83ee44",
   "projectId": "project-slotguard",
   "template": "slotguard",
   "builder": "agent",
   "goal": "SlotGuard helps local service businesses cut no-show losses by collecting a small refundable deposit at booking time. Owners get a booking link and a simple dashboard; clients see clear cancel rules. This canvas is the first pass: booking, deposits, refunds, and owner visibility. Pricing, payment provider, and deposit rules are still open.",
   "model": "gemini-3.6-flash",
-  "mode": "fresh",
-  "calls": 1,
-  "summary": "SlotGuard is a deposit protection and scheduling app designed for local service businesses to reduce no-show losses.\nI built a complete working app featuring public booking with transparent deposit policies, mock payment checkout with real-time audit logs, an owner dashboard with deposit state management (mark no-show, complete, refund), services/deposit rules settings, and simulated email/SMS notification outbox.\nDecisions for open canvas questions (SaaS pricing model, 25%/24h deposit policy, mock payment provider, synchronous concurrency control) are fully documented on the `/about` page."
+  "mode": "reuse",
+  "calls": 0,
+  "summary": ""
 }
